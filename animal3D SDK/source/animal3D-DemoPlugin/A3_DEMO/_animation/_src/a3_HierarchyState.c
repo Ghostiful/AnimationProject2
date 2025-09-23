@@ -295,6 +295,42 @@ a3i32 a3hierarchyPoseGroupLoadHTR(a3_HierarchyPoseGroup* poseGroup_out, a3_Hiera
 //****TO-DO-ANIM-PROJECT-2: IMPLEMENT ME
 //-----------------------------------------------------------------------------
 		
+		FILE* fptr;
+		fptr = fopen(resourceFilePath, "r");
+
+		if (fptr == NULL)
+		{
+			printf("Error: Couldn't open file");
+			return 1;
+		}
+
+		char buffer[256];
+		while (fgets(buffer, 256, fptr) != NULL)
+		{
+			if (strcmp(buffer, "[Header]\n") == 0)
+			{
+				// Read header data
+				char str1[32], str2[32];
+
+				fscanf(fptr, "%s %s", str1, str2);
+
+			}
+
+			else if (strcmp(buffer, "[SegmentNames&Hierarchy]\n") == 0)
+			{
+				// Read hierarchy data
+			}
+
+			else if (strcmp(buffer, "[BasePosition]\n") == 0)
+			{
+				// Read base position data
+			}
+
+			else if (strcmp(buffer, "[BasePosition]\n") == 0)
+			{
+				// Read keyfram position data?
+			}
+		}
 
 
 //-----------------------------------------------------------------------------
