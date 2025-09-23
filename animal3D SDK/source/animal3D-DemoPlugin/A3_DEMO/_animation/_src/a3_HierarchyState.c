@@ -304,6 +304,18 @@ a3i32 a3hierarchyPoseGroupLoadHTR(a3_HierarchyPoseGroup* poseGroup_out, a3_Hiera
 	return -1;
 }
 
+a3i32 readHierarchyHTR(FILE* filePtr, a3_HierarchyPoseGroup* poseOut, a3_Hierarchy* hierarchyOut)
+{
+	char name[30];
+	char parent[30];
+	int i = 0;
+	while (fscanf(filePtr, "%s %s", name, parent) == 2)
+	{
+		printf("Name: %s\t Parent: %s\n", name, parent);
+		a3hierarchySetNode(hierarchyOut, i, i - 1, name);
+	}
+}
+
 // load BVH file, read and store complete pose group and hierarchy
 a3i32 a3hierarchyPoseGroupLoadBVH(a3_HierarchyPoseGroup* poseGroup_out, a3_Hierarchy* hierarchy_out, const a3byte* resourceFilePath)
 {
