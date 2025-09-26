@@ -229,7 +229,11 @@ a3i32 a3hierarchyStateUpdateLocalInverse(const a3_HierarchyState* state)
 //****TO-DO-ANIM-PROJECT-2: IMPLEMENT ME
 //-----------------------------------------------------------------------------
 		
-
+		for (i = 0; i < state->hierarchy->numNodes; ++i)
+		{
+			a3real4x4TransformInverse(state->localSpaceInv->hpose_base[i].transformMat.m,
+				state->localSpace->hpose_base[i].transformMat.m);
+		}
 
 //-----------------------------------------------------------------------------
 //****END-TO-DO-PROJECT-2
@@ -273,7 +277,12 @@ a3i32 a3hierarchyStateUpdateObjectBindToCurrent(const a3_HierarchyState* state, 
 //****TO-DO-ANIM-PROJECT-2: IMPLEMENT ME
 //-----------------------------------------------------------------------------
 		
-
+		for (i = 0; i < state->hierarchy->numNodes; ++i)
+		{
+			a3real4x4Product(state->objectSpaceBindToCurrent->hpose_base[i].transformMat.m,
+				state->objectSpace->hpose_base[i].transformMat.m,
+				state_bind->objectSpaceInv->hpose_base[i].transformMat.m);
+		}
 
 //-----------------------------------------------------------------------------
 //****END-TO-DO-PROJECT-2
@@ -312,7 +321,14 @@ a3i32 a3hierarchyPoseGroupLoadHTR(a3_HierarchyPoseGroup* poseGroup_out, a3_Hiera
 				// Read header data
 				char str1[32], str2[32];
 
+				// file type
 				fscanf(fptr, "%s %s", str1, str2);
+				if (strcmp(str2, "HTR") != 0)
+				{
+					printf("Not an HTR file");
+					return 1;
+				}
+
 
 			}
 
@@ -350,6 +366,8 @@ a3i32 readHierarchyHTR(FILE* filePtr, a3_HierarchyPoseGroup* poseOut, a3_Hierarc
 		printf("Name: %s\t Parent: %s\n", name, parent);
 		a3hierarchySetNode(hierarchyOut, i, i - 1, name);
 	}
+
+	return 0;
 }
 
 // load BVH file, read and store complete pose group and hierarchy
