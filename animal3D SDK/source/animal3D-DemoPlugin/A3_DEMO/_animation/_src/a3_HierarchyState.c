@@ -329,6 +329,76 @@ a3i32 a3hierarchyPoseGroupLoadHTR(a3_HierarchyPoseGroup* poseGroup_out, a3_Hiera
 					return 1;
 				}
 
+				// data type
+				fscanf(fptr, "%s %s", str1, str2);
+				if (strcmp(str2, "HTRS") != 0)
+				{
+					printf("Not HTRS data type");
+					return 1;
+				}
+
+				// file version
+				fscanf(fptr, "%s %s", str1, str2);
+				if (strcmp(str2, "1") != 0)
+				{
+					printf("Not version 1");
+					return 1;
+				}
+
+				// Number of Segments
+				fscanf(fptr, "%s %s", str1, str2);
+				if (strcmp(str1, "NumSegments") == 0)
+				{
+					a3i32 numNodes = atoi(str2);
+
+					a3hierarchyCreate(hierarchy_out, numNodes, NULL);
+				}
+
+				// Number of frames
+				fscanf(fptr, "%s %s", str1, str2);
+				if (strcmp(str1, "NumFrames") == 0)
+				{
+					a3i32 numFrames = atoi(str2);
+
+					a3hierarchyPoseGroupCreate(poseGroup_out, hierarchy_out, numFrames);
+				}
+
+				// Frame rate
+				fscanf(fptr, "%s %s", str1, str2);
+				if (strcmp(str1, "DataFrameRate") == 0)
+				{
+					a3i32 numFrames = atoi(str2);
+
+					// Set frame rate
+				}
+
+				// Rotation order
+				fscanf(fptr, "%s %s", str1, str2);
+				if (strcmp(str1, "EulerRotationOrder") == 0)
+				{
+					if (strcmp(str2, "ZYX") == 0)
+					{
+						*poseGroup_out->order = a3poseEulerOrder_zyx;
+					}
+				}
+
+				// Calibration units
+				fscanf(fptr, "%s %s", str1, str2);
+				if (strcmp(str1, "CalibrationUnits") == 0)
+				{
+					// Set calibration units
+				}
+
+				// Calibration units
+				fscanf(fptr, "%s %s", str1, str2);
+				if (strcmp(str1, "RotationUnits") == 0)
+				{
+					if (strcmp(str2, "Degrees") == 0)
+					{
+						// Set rot units to degrees
+					}
+				}
+
 
 			}
 
