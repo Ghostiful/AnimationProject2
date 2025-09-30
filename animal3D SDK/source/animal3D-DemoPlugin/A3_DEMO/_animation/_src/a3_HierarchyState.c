@@ -22,6 +22,11 @@
 	Implementation of transform hierarchy state.
 */
 
+/*
+	Jake Sanderson and Isabel Rowland were both
+	responsible for the loading of the htr file
+*/
+
 #include "../a3_HierarchyState.h"
 
 #include <stdlib.h>
@@ -304,6 +309,7 @@ a3i32 a3hierarchyPoseGroupLoadHTR(a3_HierarchyPoseGroup* poseGroup_out, a3_Hiera
 //****TO-DO-ANIM-PROJECT-2: IMPLEMENT ME
 //-----------------------------------------------------------------------------
 		
+		// Open file
 		FILE* fptr;
 		fptr = fopen(resourceFilePath, "r");
 
@@ -316,11 +322,14 @@ a3i32 a3hierarchyPoseGroupLoadHTR(a3_HierarchyPoseGroup* poseGroup_out, a3_Hiera
 		a3f32 globalScale = 0;
 		a3i32 numFrames = 0;
 		char buffer[256];
+
+		// Parse through section headers
 		while (fgets(buffer, 256, fptr) != NULL)
 		{
+			// if header section read header data
 			if (strcmp(buffer, "[Header]\n") == 0)
 			{
-				if (readHeaderHTR(fptr, poseGroup_out, hierarchy_out, &globalScale, &numFrames) != 0)
+				if (readHeaderHTR(fptr, poseGroup_out, hierarchy_out, &globalScale, &numFrames) != 1)
 				{
 					printf("Error reading header");
 					return -1;
@@ -330,15 +339,27 @@ a3i32 a3hierarchyPoseGroupLoadHTR(a3_HierarchyPoseGroup* poseGroup_out, a3_Hiera
 			else if (strcmp(buffer, "[SegmentNames&Hierarchy]\n") == 0)
 			{
 				// Read hierarchy data
-				readHierarchyHTR(fptr, poseGroup_out, hierarchy_out, hierarchy_out->numNodes);
+				if (readHierarchyHTR(fptr, poseGroup_out, hierarchy_out, hierarchy_out->numNodes) != 1)
+				{
+					printf("Error reading hierarchy data");
+					return -1;
+				}
 			}
 
 			else if (strcmp(buffer, "[BasePosition]\n") == 0)
 			{
 				// Read base position data
-				readBasePositions(fptr, poseGroup_out, hierarchy_out, globalScale);
+				if (readBasePositions(fptr, poseGroup_out, hierarchy_out, globalScale) != 1)
+				{
+					printf("Error reading base pose data");
+					return -1;
+				}
 
-				readPoseData(fptr, poseGroup_out, hierarchy_out, globalScale, numFrames);
+				if (readPoseData(fptr, poseGroup_out, hierarchy_out, globalScale, numFrames) != 1)
+				{
+					printf("Error reading frame pose data");
+					return -1;
+				}
 			}
 		}
 		
@@ -361,7 +382,7 @@ a3i32 readHeaderHTR(FILE* filePtr, a3_HierarchyPoseGroup* poseOut, a3_Hierarchy*
 	if (strcmp(str2, "HTR") != 0)
 	{
 		printf("Not an HTR file");
-		return 1;
+		return 0;
 	}
 
 	// data type
@@ -369,7 +390,7 @@ a3i32 readHeaderHTR(FILE* filePtr, a3_HierarchyPoseGroup* poseOut, a3_Hierarchy*
 	if (strcmp(str2, "HTRS") != 0)
 	{
 		printf("Not HTRS data type");
-		return 1;
+		return 0;
 	}
 
 	// file version
@@ -377,7 +398,7 @@ a3i32 readHeaderHTR(FILE* filePtr, a3_HierarchyPoseGroup* poseOut, a3_Hierarchy*
 	if (strcmp(str2, "1") != 0)
 	{
 		printf("Not version 1");
-		return 1;
+		return 0;
 	}
 
 	// Number of Segments
@@ -469,7 +490,7 @@ a3i32 readHeaderHTR(FILE* filePtr, a3_HierarchyPoseGroup* poseOut, a3_Hierarchy*
 		*globalScale = scaleFactor * calibrationScale;
 	}
 
-	return 0;
+	return 1;
 }
 
 a3i32 readHierarchyHTR(FILE* filePtr, a3_HierarchyPoseGroup* poseOut, a3_Hierarchy* hierarchyOut, int numNodes)
@@ -478,6 +499,8 @@ a3i32 readHierarchyHTR(FILE* filePtr, a3_HierarchyPoseGroup* poseOut, a3_Hierarc
 	char parent[a3node_nameSize];
 	//char buffer[256];
 	int i = 0;
+
+	// Set up node hierarchy
 	for (; i < numNodes; i++)
 	{
 		(void)fscanf(filePtr, "%s %s", name, parent);
@@ -485,7 +508,7 @@ a3i32 readHierarchyHTR(FILE* filePtr, a3_HierarchyPoseGroup* poseOut, a3_Hierarc
 		a3hierarchySetNode(hierarchyOut, i, a3hierarchyGetNodeIndex(hierarchyOut, parent), name);
 	}
 
-	return 0;
+	return 1;
 }
 
 a3i32 readBasePositions(FILE* filePtr, a3_HierarchyPoseGroup* poseOut, a3_Hierarchy* hierarchyOut, a3f32 globalScale)
@@ -497,11 +520,14 @@ a3i32 readBasePositions(FILE* filePtr, a3_HierarchyPoseGroup* poseOut, a3_Hierar
 
 	for (a3ui32 i = 0; i < hierarchyOut->numNodes; i++)
 	{
+		// Scan data line
 		(void)fscanf(filePtr, "%s %f %f %f %f %f %f %f", key, &tx, &ty, &tz, &rx, &ry, &rz, &scale);
 		
+		// Get node to be changed
 		j = a3hierarchyGetNodeIndex(hierarchyOut, key);
 		spatialPose = &poseOut->hpose[0].hpose_base[j];
 		
+		// Set data in node to be changed
 		a3spatialPoseSetTranslation(spatialPose, tx * globalScale, ty * globalScale, tz * globalScale);
 		a3spatialPoseSetRotation(spatialPose, rx, ry, rz);
 		a3spatialPoseSetScale(spatialPose, scale, scale, scale);
@@ -520,8 +546,10 @@ a3i32 readPoseData(FILE* filePtr, a3_HierarchyPoseGroup* poseOut, a3_Hierarchy* 
 	a3_SpatialPose* spatialPose = 0;
 	int animCount = 0;
 
+	// Go till end of file
 	while (!feof(filePtr))
 	{
+		// Get header for start of animation
 		fgets(header, a3node_nameSize, filePtr);
 		
 		if (header[0] == '#')
@@ -550,6 +578,7 @@ a3i32 readPoseData(FILE* filePtr, a3_HierarchyPoseGroup* poseOut, a3_Hierarchy* 
 						}
 					}
 
+					// Set end of string to null
 					for (int i = x - 1; i < a3node_nameSize; i++) 
 					{
 						segment[i] = (char)NULL;
@@ -558,20 +587,25 @@ a3i32 readPoseData(FILE* filePtr, a3_HierarchyPoseGroup* poseOut, a3_Hierarchy* 
 					int currentPos = ftell(filePtr);
 					while (fgets(data, 256, filePtr))
 					{
+						// Scan line of data
 						if (sscanf(data, "%i %f %f %f %f %f %f %f", &frameInd, &tx, &ty, &tz, &rx, &ry, &rz, &scale) == 8)
 						{
+							// Get node to be changed
 							j = a3hierarchyGetNodeIndex(hierarchyOut, segment);
 							int offset = a3hierarchyPoseGroupGetNodePoseOffsetIndex(poseOut, frameInd - 1, j);
 							spatialPose = poseOut->pose + (offset + (animCount * hierarchyOut->numNodes));
 
+							// Set data in node to be changed
 							a3spatialPoseSetTranslation(spatialPose, tx * globalScale, ty * globalScale, tz * globalScale);
 							a3spatialPoseSetRotation(spatialPose, rx, ry, rz);
 							a3spatialPoseSetScale(spatialPose, scale, scale, scale);
 
+							// Cache position of file to go back to if end of anim data reached
 							currentPos = ftell(filePtr);
 						}
 						else
 						{
+							// If read in a header then go back to currentPos and break
 							fseek(filePtr, currentPos, SEEK_SET);
 							break;
 						}
@@ -579,6 +613,7 @@ a3i32 readPoseData(FILE* filePtr, a3_HierarchyPoseGroup* poseOut, a3_Hierarchy* 
 				}
 			} while (header[0] != '#');
 
+			// Increment animCount to properly calculate the offset
 			animCount += frameInd;
 			frameInd = 0;
 		}
