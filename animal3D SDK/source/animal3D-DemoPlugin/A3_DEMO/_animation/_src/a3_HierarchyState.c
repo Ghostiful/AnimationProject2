@@ -335,6 +335,8 @@ a3i32 a3hierarchyPoseGroupLoadHTR(a3_HierarchyPoseGroup* poseGroup_out, a3_Hiera
 			else if (strcmp(buffer, "[SegmentNames&Hierarchy]\n") == 0)
 			{
 				// Read hierarchy data
+				//fgets(buffer, 256, fptr);
+				readHierarchyHTR(fptr, poseGroup_out, hierarchy_out, 20);
 			}
 
 			else if (strcmp(buffer, "[BasePosition]\n") == 0)
@@ -346,7 +348,9 @@ a3i32 a3hierarchyPoseGroupLoadHTR(a3_HierarchyPoseGroup* poseGroup_out, a3_Hiera
 			{
 				// Read keyfram position data?
 			}
+			
 		}
+		
 
 
 //-----------------------------------------------------------------------------
@@ -356,15 +360,18 @@ a3i32 a3hierarchyPoseGroupLoadHTR(a3_HierarchyPoseGroup* poseGroup_out, a3_Hiera
 	return -1;
 }
 
-a3i32 readHierarchyHTR(FILE* filePtr, a3_HierarchyPoseGroup* poseOut, a3_Hierarchy* hierarchyOut)
+a3i32 readHierarchyHTR(FILE* filePtr, a3_HierarchyPoseGroup* poseOut, a3_Hierarchy* hierarchyOut, int numNodes)
 {
 	char name[30];
 	char parent[30];
+	//char buffer[256];
 	int i = 0;
-	while (fscanf(filePtr, "%s %s", name, parent) == 2)
+	for (; i < numNodes; i++)
 	{
+		fscanf(filePtr, "%s %s", name, parent);
 		printf("Name: %s\t Parent: %s\n", name, parent);
 		a3hierarchySetNode(hierarchyOut, i, i - 1, name);
+		//fgets(buffer, 256, filePtr);
 	}
 
 	return 0;
