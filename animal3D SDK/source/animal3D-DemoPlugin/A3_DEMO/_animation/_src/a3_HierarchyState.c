@@ -318,88 +318,11 @@ a3i32 a3hierarchyPoseGroupLoadHTR(a3_HierarchyPoseGroup* poseGroup_out, a3_Hiera
 		{
 			if (strcmp(buffer, "[Header]\n") == 0)
 			{
-				// Read header data
-				char str1[32], str2[32];
-
-				// file type
-				fscanf(fptr, "%s %s", str1, str2);
-				if (strcmp(str2, "HTR") != 0)
+				if (readHeaderHTR(fptr, poseGroup_out, hierarchy_out) != 0)
 				{
-					printf("Not an HTR file");
+					printf("Error reading header");
 					return 1;
 				}
-
-				// data type
-				fscanf(fptr, "%s %s", str1, str2);
-				if (strcmp(str2, "HTRS") != 0)
-				{
-					printf("Not HTRS data type");
-					return 1;
-				}
-
-				// file version
-				fscanf(fptr, "%s %s", str1, str2);
-				if (strcmp(str2, "1") != 0)
-				{
-					printf("Not version 1");
-					return 1;
-				}
-
-				// Number of Segments
-				fscanf(fptr, "%s %s", str1, str2);
-				if (strcmp(str1, "NumSegments") == 0)
-				{
-					a3i32 numNodes = atoi(str2);
-
-					a3hierarchyCreate(hierarchy_out, numNodes, NULL);
-				}
-
-				// Number of frames
-				fscanf(fptr, "%s %s", str1, str2);
-				if (strcmp(str1, "NumFrames") == 0)
-				{
-					a3i32 numFrames = atoi(str2);
-
-					a3hierarchyPoseGroupCreate(poseGroup_out, hierarchy_out, numFrames);
-				}
-
-				// Frame rate
-				fscanf(fptr, "%s %s", str1, str2);
-				if (strcmp(str1, "DataFrameRate") == 0)
-				{
-					a3i32 numFrames = atoi(str2);
-
-					// Set frame rate
-				}
-
-				// Rotation order
-				fscanf(fptr, "%s %s", str1, str2);
-				if (strcmp(str1, "EulerRotationOrder") == 0)
-				{
-					if (strcmp(str2, "ZYX") == 0)
-					{
-						*poseGroup_out->order = a3poseEulerOrder_zyx;
-					}
-				}
-
-				// Calibration units
-				fscanf(fptr, "%s %s", str1, str2);
-				if (strcmp(str1, "CalibrationUnits") == 0)
-				{
-					// Set calibration units
-				}
-
-				// Calibration units
-				fscanf(fptr, "%s %s", str1, str2);
-				if (strcmp(str1, "RotationUnits") == 0)
-				{
-					if (strcmp(str2, "Degrees") == 0)
-					{
-						// Set rot units to degrees
-					}
-				}
-
-
 			}
 
 			else if (strcmp(buffer, "[SegmentNames&Hierarchy]\n") == 0)
@@ -428,6 +351,121 @@ a3i32 a3hierarchyPoseGroupLoadHTR(a3_HierarchyPoseGroup* poseGroup_out, a3_Hiera
 //-----------------------------------------------------------------------------
 	}
 	return -1;
+}
+
+a3i32 readHeaderHTR(FILE* filePtr, a3_HierarchyPoseGroup* poseOut, a3_Hierarchy* hierarchyOut)
+{
+	// Read header data
+	char str1[32], str2[32];
+
+	// file type
+	fscanf(filePtr, "%s %s", str1, str2);
+	if (strcmp(str2, "HTR") != 0)
+	{
+		printf("Not an HTR file");
+		return 1;
+	}
+
+	// data type
+	fscanf(filePtr, "%s %s", str1, str2);
+	if (strcmp(str2, "HTRS") != 0)
+	{
+		printf("Not HTRS data type");
+		return 1;
+	}
+
+	// file version
+	fscanf(filePtr, "%s %s", str1, str2);
+	if (strcmp(str2, "1") != 0)
+	{
+		printf("Not version 1");
+		return 1;
+	}
+
+	// Number of Segments
+	fscanf(filePtr, "%s %s", str1, str2);
+	if (strcmp(str1, "NumSegments") == 0)
+	{
+		a3i32 numNodes = atoi(str2);
+
+		a3hierarchyCreate(hierarchyOut, numNodes, NULL);
+	}
+
+	// Number of frames
+	fscanf(filePtr, "%s %s", str1, str2);
+	if (strcmp(str1, "NumFrames") == 0)
+	{
+		a3i32 numFrames = atoi(str2);
+
+		a3hierarchyPoseGroupCreate(poseOut, hierarchyOut, numFrames);
+	}
+
+	// Frame rate
+	fscanf(filePtr, "%s %s", str1, str2);
+	if (strcmp(str1, "DataFrameRate") == 0)
+	{
+		a3i32 numFrames = atoi(str2);
+
+		// Set frame rate
+	}
+
+	// Rotation order
+	fscanf(filePtr, "%s %s", str1, str2);
+	if (strcmp(str1, "EulerRotationOrder") == 0)
+	{
+		if (strcmp(str2, "ZYX") == 0)
+		{
+			*poseOut->order = a3poseEulerOrder_zyx;
+		}
+	}
+
+	// Calibration units
+	fscanf(filePtr, "%s %s", str1, str2);
+	if (strcmp(str1, "CalibrationUnits") == 0)
+	{
+		// Set calibration units
+	}
+
+	// Rotations units
+	fscanf(filePtr, "%s %s", str1, str2);
+	if (strcmp(str1, "RotationUnits") == 0)
+	{
+		if (strcmp(str2, "Degrees") == 0)
+		{
+			// Set rot units to degrees
+		}
+	}
+
+	// Gravity axis
+	fscanf(filePtr, "%s %s", str1, str2);
+	if (strcmp(str1, "GlobalAxisofGravity") == 0)
+	{
+		if (strcmp(str2, "Y") == 0)
+		{
+			// Set gravity to y axis
+		}
+	}
+
+	// Bone length axis
+	fscanf(filePtr, "%s %s", str1, str2);
+	if (strcmp(str1, "BoneLengthAxis") == 0)
+	{
+		if (strcmp(str2, "Y") == 0)
+		{
+			// Set bone length axis to y
+		}
+	}
+
+	// Scale Factor
+	fscanf(filePtr, "%s %s", str1, str2);
+	if (strcmp(str1, "ScaleFactor") == 0)
+	{
+		a3f32 scaleFactor = (a3f32)atof(str2);
+
+		strcmp(str1, str2);
+	}
+
+	return 0;
 }
 
 a3i32 readHierarchyHTR(FILE* filePtr, a3_HierarchyPoseGroup* poseOut, a3_Hierarchy* hierarchyOut, int numNodes)
