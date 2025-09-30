@@ -184,13 +184,16 @@ a3i32 a3hierarchyStateUpdateObjectBindToCurrent(const a3_HierarchyState* state, 
 a3i32 a3hierarchyPoseGroupLoadHTR(a3_HierarchyPoseGroup* poseGroup_out, a3_Hierarchy* hierarchy_out, const a3byte* resourceFilePath);
 
 // read header section of HTR file
-a3i32 readHeaderHTR(FILE* filePtr, a3_HierarchyPoseGroup* poseOut, a3_Hierarchy* hierarchyOut, a3f32 *globalScale);
+a3i32 readHeaderHTR(FILE* filePtr, a3_HierarchyPoseGroup* poseOut, a3_Hierarchy* hierarchyOut, a3f32 *globalScale, a3i32 *numFrames);
 
 // read hierarchy section of HTR file
 a3i32 readHierarchyHTR(FILE* filePtr, a3_HierarchyPoseGroup* poseOut, a3_Hierarchy* hierarchyOut, int numPoses);
 
 // read base position of HTR file
 a3i32 readBasePositions(FILE* filePtr, a3_HierarchyPoseGroup* poseOut, a3_Hierarchy* hierarchyOut, a3f32 globalScale);
+
+// read pose data from HTR file
+a3i32 readPoseData(FILE* filePtr, a3_HierarchyPoseGroup* poseOut, a3_Hierarchy* hierarchyOut, a3f32 globalScale, a3i32 numFrames);
 
 // load BVH file, read and store complete pose group and hierarchy
 a3i32 a3hierarchyPoseGroupLoadBVH(a3_HierarchyPoseGroup* poseGroup_out, a3_Hierarchy* hierarchy_out, const a3byte* resourceFilePath);
