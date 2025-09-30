@@ -40,13 +40,11 @@ a3i32 a3spatialPoseConvert(a3_SpatialPose* spatialPose, const a3_SpatialPoseChan
 		// -> concat (matrix mul) them in the correct order
 		//	   -> v' = t + R * S * v
 
-		// TEMP SOLUTION (for testing, implement the above version)
 		a3real4x4SetRotateZYX(spatialPose->transformMat.m, 
 			a3trigValid_sind(spatialPose->rotate.x), 
 			a3trigValid_sind(spatialPose->rotate.y), 
 			a3trigValid_sind(spatialPose->rotate.z));
 
-		// this part can stay
 		a3real3Add(spatialPose->transformMat.m[3], spatialPose->translate.v);
 
 		// **** DO THIS EVERYWHERE IN THIS FILE:
@@ -138,11 +136,11 @@ a3i32 a3spatialPoseLerp(a3_SpatialPose* spatialPose_out, const a3_SpatialPose* s
 //-----------------------------------------------------------------------------
 //****TO-DO-ANIM-PROJECT-2: IMPLEMENT ME
 //-----------------------------------------------------------------------------
-		
+
 		a3real4Lerp(spatialPose_out->rotate.v, spatialPose_0->rotate.v, spatialPose_1->rotate.v, u);
 		a3real4Lerp(spatialPose_out->translate.v, spatialPose_0->translate.v, spatialPose_1->translate.v, u);
 		a3real4Lerp(spatialPose_out->scale.v, spatialPose_0->scale.v, spatialPose_1->scale.v, u);
-		//a3real4???(spatialPose_out->scale.v, spatialPose_0->scale.v, spatialPose_1->scale.v, u);
+		
 
 //-----------------------------------------------------------------------------
 //****END-TO-DO-PROJECT-2
