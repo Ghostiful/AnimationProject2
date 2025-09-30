@@ -313,12 +313,13 @@ a3i32 a3hierarchyPoseGroupLoadHTR(a3_HierarchyPoseGroup* poseGroup_out, a3_Hiera
 			return 1;
 		}
 
+		a3f32 globalScale = 0;
 		char buffer[256];
 		while (fgets(buffer, 256, fptr) != NULL)
 		{
 			if (strcmp(buffer, "[Header]\n") == 0)
 			{
-				if (readHeaderHTR(fptr, poseGroup_out, hierarchy_out) != 0)
+				if (readHeaderHTR(fptr, poseGroup_out, hierarchy_out, &globalScale) != 0)
 				{
 					printf("Error reading header");
 					return 1;
@@ -335,6 +336,7 @@ a3i32 a3hierarchyPoseGroupLoadHTR(a3_HierarchyPoseGroup* poseGroup_out, a3_Hiera
 			else if (strcmp(buffer, "[BasePosition]\n") == 0)
 			{
 				// Read base position data
+				readBasePositions(fptr, poseGroup_out, hierarchy_out, globalScale);
 			}
 
 			else if (strcmp(buffer, "[BasePosition]\n") == 0)
@@ -353,7 +355,7 @@ a3i32 a3hierarchyPoseGroupLoadHTR(a3_HierarchyPoseGroup* poseGroup_out, a3_Hiera
 	return -1;
 }
 
-a3i32 readHeaderHTR(FILE* filePtr, a3_HierarchyPoseGroup* poseOut, a3_Hierarchy* hierarchyOut)
+a3i32 readHeaderHTR(FILE* filePtr, a3_HierarchyPoseGroup* poseOut, a3_Hierarchy* hierarchyOut, a3f32 *globalScale)
 {
 	// Read header data
 	char str1[32], str2[32];
@@ -462,7 +464,7 @@ a3i32 readHeaderHTR(FILE* filePtr, a3_HierarchyPoseGroup* poseOut, a3_Hierarchy*
 	{
 		a3f32 scaleFactor = (a3f32)atof(str2);
 
-		strcmp(str1, str2);
+		*globalScale = scaleFactor;
 	}
 
 	return 0;
@@ -480,6 +482,28 @@ a3i32 readHierarchyHTR(FILE* filePtr, a3_HierarchyPoseGroup* poseOut, a3_Hierarc
 		printf("Name: %s\t Parent: %s\n", name, parent);
 		a3hierarchySetNode(hierarchyOut, i, i - 1, name);
 		//fgets(buffer, 256, filePtr);
+	}
+
+	return 0;
+}
+
+a3i32 readBasePositions(FILE* filePtr, a3_HierarchyPoseGroup* poseOut, a3_Hierarchy* hierarchyOut, a3f32 globalScale)
+{
+	char key[a3node_nameSize];
+	a3f32 tx, ty, tz, rx, ry, rz, scale;
+	a3i32 j;
+	a3_SpatialPose* spatialPose = 0;
+
+	for (a3ui32 i = 0; i < hierarchyOut->numNodes; i++)
+	{
+		fscanf(filePtr, "%s %f %f %f %f %f %f %f", key, &tx, &ty, &tz, &rx, &ry, &rz, &scale);
+		
+		j = a3hierarchyGetNodeIndex(hierarchyOut, key);
+		spatialPose = &poseOut->hpose[0].hpose_base[j];
+		
+		a3spatialPoseSetTranslation(spatialPose, tx * globalScale, ty * globalScale, tz * globalScale);
+		a3spatialPoseSetRotation(spatialPose, rx, ry, rz);
+		a3spatialPoseSetScale(spatialPose, scale, scale, scale);
 	}
 
 	return 0;
