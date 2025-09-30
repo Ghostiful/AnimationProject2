@@ -374,7 +374,7 @@ a3i32 a3hierarchyPoseGroupLoadHTR(a3_HierarchyPoseGroup* poseGroup_out, a3_Hiera
 a3i32 readHeaderHTR(FILE* filePtr, a3_HierarchyPoseGroup* poseOut, a3_Hierarchy* hierarchyOut, a3f32 *globalScale, a3i32 *numFrames)
 {
 	// Read header data
-	char str1[32], str2[32];
+	char str1[32] = { 0 }, str2[32] = { 0 };
 	float calibrationScale = 1;
 
 	// file type
