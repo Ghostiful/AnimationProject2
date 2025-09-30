@@ -470,8 +470,8 @@ a3i32 readHeaderHTR(FILE* filePtr, a3_HierarchyPoseGroup* poseOut, a3_Hierarchy*
 
 a3i32 readHierarchyHTR(FILE* filePtr, a3_HierarchyPoseGroup* poseOut, a3_Hierarchy* hierarchyOut, int numNodes)
 {
-	char name[30];
-	char parent[30];
+	char name[a3node_nameSize];
+	char parent[a3node_nameSize];
 	//char buffer[256];
 	int i = 0;
 	for (; i < numNodes; i++)
